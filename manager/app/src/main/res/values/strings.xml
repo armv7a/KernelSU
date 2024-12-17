@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">KernelSU</string>
+    <string name="confirm">Confirm</string>
     <string name="home">Home</string>
     <string name="home_not_installed">Not installed</string>
     <string name="home_click_to_install">Click to install</string>
@@ -25,6 +26,8 @@
     <string name="module">Module</string>
     <string name="module_sort_action_first">Sort (Action First)</string>
     <string name="module_sort_enabled_first">Sort (Enabled First)</string>
+    <string name="confirm_module_installation">Confirm Installation</string>
+    <string name="module_install_prompt_with_name">Install module %1$s?</string>
     <string name="uninstall">Uninstall</string>
     <string name="restore">Restore</string>
     <string name="module_install">Install</string>

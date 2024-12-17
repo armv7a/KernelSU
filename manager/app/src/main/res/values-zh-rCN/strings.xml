@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="confirm">确定</string>
     <string name="home">主页</string>
     <string name="home_not_installed">未安装</string>
     <string name="home_click_to_install">点击安装</string>
@@ -23,6 +24,8 @@
     <string name="module">模块</string>
     <string name="module_sort_action_first">可执行优先</string>
     <string name="module_sort_enabled_first">已启用优先</string>
+    <string name="confirm_module_installation">安装确认</string>
+    <string name="module_install_prompt_with_name">安装模块 %1$s?</string>
     <string name="uninstall">卸载</string>
     <string name="restore">还原</string>
     <string name="module_install">安装</string>

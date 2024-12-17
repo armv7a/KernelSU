@@ -37,6 +37,7 @@ import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -57,6 +58,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberTopAppBarState
@@ -138,6 +140,9 @@ fun ModuleScreen(navigator: DestinationsNavigator) {
     val webUILauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { viewModel.fetchModuleList() }
+    
+    var zipUri by remember { mutableStateOf<Uri?>(null) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -205,18 +210,16 @@ fun ModuleScreen(navigator: DestinationsNavigator) {
                 val moduleInstall = stringResource(id = R.string.module_install)
                 val selectZipLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.StartActivityForResult()
-                ) {
-                    if (it.resultCode != RESULT_OK) {
+                ) { result ->
+                    if (result.resultCode != RESULT_OK) {
                         return@rememberLauncherForActivityResult
                     }
-                    val data = it.data ?: return@rememberLauncherForActivityResult
+                    val data = result.data ?: return@rememberLauncherForActivityResult
                     val uri = data.data ?: return@rememberLauncherForActivityResult
 
-                    navigator.navigate(FlashScreenDestination(FlashIt.FlashModule(uri)))
-
-                    viewModel.markNeedRefresh()
-
-                    Log.i("ModuleScreen", "select zip result: ${it.data}")
+                    // save the selected Uri and trigger confirmation dialog
+                    zipUri = uri
+                    showConfirmDialog = true
                 }
 
                 ExtendedFloatingActionButton(
@@ -235,6 +238,35 @@ fun ModuleScreen(navigator: DestinationsNavigator) {
         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
         snackbarHost = { SnackbarHost(hostState = snackBarHost) }
     ) { innerPadding ->
+        // confirmation dialog
+        if (showConfirmDialog && zipUri != null) {
+            // extract the module name from the zipUri
+            val moduleName = zipUri?.lastPathSegment?.substringAfterLast('/') ?: "Unknown Module"
+
+            AlertDialog(
+                onDismissRequest = { showConfirmDialog = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showConfirmDialog = false
+                        navigator.navigate(FlashScreenDestination(FlashIt.FlashModule(zipUri!!)))
+                    }) {
+                        Text(stringResource(R.string.confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showConfirmDialog = false }) {
+                        Text(stringResource(android.R.string.cancel))
+                    }
+                },
+                title = { Text(stringResource(R.string.confirm_module_installation)) },
+                text = { 
+                    Text(
+                        stringResource(R.string.module_install_prompt_with_name, moduleName)
+                    ) 
+                }
+            )
+        }
+
         when {
             hasMagisk -> {
                 Box(
@@ -249,7 +281,6 @@ fun ModuleScreen(navigator: DestinationsNavigator) {
                     )
                 }
             }
-
             else -> {
                 ModuleList(
                     navigator,
